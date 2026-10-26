@@ -3701,86 +3701,68 @@ const WISH_ENTRY =
     "entry.1786872359";
 
 
-async function sendWish() {
 
-    const wish =
-        document
-        .getElementById(
-            "wish"
-        )
-        .value
-        .trim();
+function sendWish() {
+    const wishInput = document.getElementById("wish");
+    const status = document.getElementById("wishStatus");
+    const button = document.querySelector(".wish-submit");
 
-
-    const status =
-        document.getElementById(
-            "wishStatus"
-        );
-
+    const wish = wishInput.value.trim();
 
     if (!wish) {
-
-        status.innerText =
-            "Tulis wish kamu dulu ya ♡";
-
+        status.innerText = "Tulis wish kamu dulu ya ♡";
         return;
-
     }
 
+    button.disabled = true;
+    button.innerText = "Mengirim...";
+    status.innerText = "Sending your wish...";
 
-    status.innerText =
-        "sending your wish...";
+    const iframe = document.createElement("iframe");
+    iframe.name = "googleFormSubmitAzzah";
+    iframe.style.display = "none";
+    document.body.appendChild(iframe);
 
+    const form = document.createElement("form");
+    form.method = "POST";
+    form.action = FORM_URL;
+    form.target = iframe.name;
+    form.style.display = "none";
 
-    const formData =
-        new URLSearchParams();
+    const input = document.createElement("input");
+    input.type = "hidden";
+    input.name = WISH_ENTRY;
+    input.value = wish;
 
-
-    formData.append(
-        WISH_ENTRY,
-        wish
-    );
-
+    form.appendChild(input);
+    document.body.appendChild(form);
 
     try {
+        form.submit();
 
-        await fetch(
+        setTimeout(function() {
+            form.remove();
+            iframe.remove();
 
-            FORM_URL,
+            status.innerText =
+                "Permintaan pengiriman selesai ♡ Cek Google Sheets untuk memastikan wish masuk.";
 
-            {
+            wishInput.value = "";
 
-                method: "POST",
+            button.disabled = false;
+            button.innerText = "SEND MY WISH ♡";
+        }, 2000);
 
-                mode: "no-cors",
-
-                body: formData
-
-            }
-
-        );
-
-
-        status.innerText =
-            "Your wish has been sent ♡";
-
-
-        document
-        .getElementById(
-            "wish"
-        )
-        .value = "";
-
-
-    }
-
-    catch (error) {
+    } catch (error) {
+        form.remove();
+        iframe.remove();
 
         status.innerText =
-            "Gagal mengirim. Coba lagi.";
+            "Pengiriman gagal dicoba. Silakan coba lagi.";
 
+        button.disabled = false;
+        button.innerText = "SEND MY WISH ♡";
     }
-
 }
 
 </script>
